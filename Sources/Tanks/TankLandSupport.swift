@@ -2,22 +2,11 @@ import Foundation
 
 extension TankWorld {
 
-	func findAllGameObjects () -> [GameObject] {
-		var gameObjects = [GameObject]()
-		for row in 0..<numberRows {
-			for col in 0..<numberCols {
-				if let gameObject = grid[row][col]  {
-					gameObjects.append(gameObject)
-				}
-			}
-		}
-		return gameObjects
-	}
-
-	/*func handleRadar(tank: Tank) {
+	
+	func handleRadar(tank: Tank) {
 		guard let radarAction = tank.preActions[.Radar] else {return}
 		actionRunRadar (tank: tank, radarAction: radarAction as! RadarAction)
-	}*/
+	}
 
 	func handleMove(tank: Tank) {
 		guard let moveAction = tank.postActions[.Move] else {return}
@@ -27,6 +16,7 @@ extension TankWorld {
 	func handleTankPre(tank: Tank) {
 		tank.computePreActions()
 		tank.useEnergy(amount: constants.costLifeSupportTank)
+		handleRadar(tank: tank)
 		//ADD PREACTION STUFF
 	}
 
@@ -43,7 +33,7 @@ extension TankWorld {
 
 	func handleRoverPost(rover: Rover) {
 		if let dir = rover.direction {
-			if (rover.energy > constants.costOfMovingRover) {
+			if isEnergyAvailable(gameObject: rover, cost: constants.costOfMovingRover) {
 				grid[rover.position.row][rover.position.col] = nil
 				let newPos = newPosition(position: rover.position, direction: dir, distance: 1)
 				if newPos.row != rover.position.row || newPos.col != rover.position.col {rover.useEnergy(amount: constants.costOfMovingRover)}
@@ -56,7 +46,7 @@ extension TankWorld {
 			}
 		}
 		else {
-			if (rover.energy > constants.costOfMovingRover) {
+			if isEnergyAvailable(gameObject: rover, cost: constants.costOfMovingRover) {
 				grid[rover.position.row][rover.position.col] = nil
 				let newPos = newPosition(position: rover.position, direction: randomDirection(), distance: 1)
 				rover.setPosition(newPosition: newPos)
@@ -81,13 +71,31 @@ extension TankWorld {
 
 		let cost = constants.costOfMovingTankPerUnitDistance[moveAction.distance - 1]
 
-		if isPositionEmpty(newPos) && !containsTank(newPos) && tank.energy > cost{
+		if isPositionEmpty(newPos) && !containsTank(newPos) && isEnergyAvailable(gameObject: tank, cost: cost){
 			grid[tank.position.row][tank.position.col] = nil
 			tank.setPosition(newPosition: newPos)
 			grid[tank.position.row][tank.position.col] = tank
 			tank.useEnergy(amount: cost)
 		}
 	}
+
+	func actionRunRadar(tank: Tank, radarAction: RadarAction) {
+		
+	}
+
+
+	func findAllGameObjects () -> [GameObject] {
+		var gameObjects = [GameObject]()
+		for row in 0..<numberRows {
+			for col in 0..<numberCols {
+				if let gameObject = grid[row][col]  {
+					gameObjects.append(gameObject)
+				}
+			}
+		}
+		return gameObjects
+	}
+
 
 	func newPosition (position: Position, direction: Direction, distance: Int) -> Position {
 		var rowOffset = 0
@@ -154,5 +162,9 @@ extension TankWorld {
 		else if dirNum == 6 {dir = .W}
 		else {dir = .NW}
 		return dir
+	}
+
+	func isEnergyAvailable(gameObject: GameObject, cost: Int) -> Bool {
+		return gameObject.energy > cost
 	}
 }

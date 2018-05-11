@@ -12,7 +12,7 @@ protocol PostAction: Action {
 }
 
 enum Actions {
-	case Move, Shield, Message, Missile
+	case Move, Shield, Message, Missile, Radar
 }
 
 struct MoveAction: PostAction {
@@ -27,5 +27,18 @@ struct MoveAction: PostAction {
 		action = .Move
 		self.distance = distance
 		self.direction = direction
+	}
+}
+
+struct RadarAction: PreAction {
+	let action: Actions
+	let range: Int
+	var description: String {
+		return "\(action) \(range)"
+	}
+
+	init(range: Int) {
+		action = .Radar
+		self.range = range
 	}
 }

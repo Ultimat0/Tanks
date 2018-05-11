@@ -27,16 +27,7 @@ class Tank: GameObject {
 
 	func computePostActions() {
 		let dist = Int(random() % 3) + 1
-		let dirNum = Int(random() % 8)
-		var dir: Direction = .N
-		if dirNum == 0 {dir = .N}
-		else if dirNum == 1 {dir = .NE}
-		else if dirNum == 2 {dir = .E}
-		else if dirNum == 3 {dir = .SE}
-		else if dirNum == 4 {dir = .S}
-		else if dirNum == 5 {dir = .SW}
-		else if dirNum == 6 {dir = .W}
-		else if dirNum == 7 {dir = .NW}
+		let dir = randomDirection()
 		print ("\(name): \(dir) \(dist)")
 		addPostAction (postAction: MoveAction(distance: dist, direction: dir))
 	}
