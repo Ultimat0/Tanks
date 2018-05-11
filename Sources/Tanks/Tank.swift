@@ -26,9 +26,7 @@ class Tank: GameObject {
 	}
 
 	func computePostActions() {
-		srandom(UInt32(time(nil)))
-		let dist = 1//Int(random() % 3)
-		srandom(UInt32(time(nil)))
+		let dist = Int(random() % 3) + 1
 		let dirNum = Int(random() % 8)
 		var dir: Direction = .N
 		if dirNum == 0 {dir = .N}
@@ -39,6 +37,7 @@ class Tank: GameObject {
 		else if dirNum == 5 {dir = .SW}
 		else if dirNum == 6 {dir = .W}
 		else if dirNum == 7 {dir = .NW}
+		print ("\(name): \(dir) \(dist)")
 		addPostAction (postAction: MoveAction(distance: dist, direction: dir))
 	}
 

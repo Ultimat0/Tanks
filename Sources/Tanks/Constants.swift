@@ -9,7 +9,7 @@ struct Constants {
 	let costOfFlyingMissilePerUnitDistance = 200
 	let costOfMovingTankPerUnitDistance = [100, 300, 600]
 	let costOfMovingRover = 50
-	let costLifeSupportTank= 100
+	let costLifeSupportTank = 100
 	let costLifeSupportRover = 40
 	let costLifeSupportMine = 20
 	let missileStrikeMultiple = 10

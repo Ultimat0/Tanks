@@ -24,28 +24,68 @@ extension TankWorld {
 		actionRunMove(tank: tank, moveAction: moveAction as! MoveAction)
 	}
 
-	func handleTank(tank: Tank) {
+	func handleTankPre(tank: Tank) {
 		tank.computePreActions()
+		tank.useEnergy(amount: constants.costLifeSupportTank)
+		//ADD PREACTION STUFF
+	}
+
+	func handleTankPost(tank: Tank) {
 		tank.computePostActions()
 		handleMove(tank: tank)
 		tank.clearActions()
 	}
 
-	func handleRover(rover: Rover) {
-		if let dir = rover.direction {
 
-		}
+	func handleRoverPre(rover: Rover) {
+		rover.useEnergy(amount: constants.costLifeSupportRover)
 	}
 
+	func handleRoverPost(rover: Rover) {
+		if let dir = rover.direction {
+			if (rover.energy > constants.costOfMovingRover) {
+				grid[rover.position.row][rover.position.col] = nil
+				let newPos = newPosition(position: rover.position, direction: dir, distance: 1)
+				if newPos.row != rover.position.row || newPos.col != rover.position.col {rover.useEnergy(amount: constants.costOfMovingRover)}
+				if !isPositionEmpty(newPos) {
+					grid[rover.position.row][rover.position.col]!.useEnergy(amount: rover.energy)
+				}
+				else {
+					grid[newPos.row][newPos.col] = rover
+				}
+			}
+		}
+		else {
+			if (rover.energy > constants.costOfMovingRover) {
+				grid[rover.position.row][rover.position.col] = nil
+				let newPos = newPosition(position: rover.position, direction: randomDirection(), distance: 1)
+				rover.setPosition(newPosition: newPos)
+				if !isPositionEmpty(newPos) {
+					grid[rover.position.row][rover.position.col]!.useEnergy(amount: rover.energy)
+				}
+				else {
+					grid[newPos.row][newPos.col] = rover
+				}
+			}
+		}
+		
+	}
+
+	func handleMinePre (mine: Mine) {
+		mine.useEnergy(amount: constants.costLifeSupportMine)
+	}
 
 	func actionRunMove(tank: Tank, moveAction: MoveAction) {
 		
 		let newPos: Position = newPosition(position: tank.position, direction: moveAction.direction, distance: moveAction.distance)
 
-		if isPositionEmpty(newPos) {
+		let cost = constants.costOfMovingTankPerUnitDistance[moveAction.distance - 1]
+
+		if isPositionEmpty(newPos) && !containsTank(newPos) && tank.energy > cost{
 			grid[tank.position.row][tank.position.col] = nil
 			tank.setPosition(newPosition: newPos)
 			grid[tank.position.row][tank.position.col] = tank
+			tank.useEnergy(amount: cost)
 		}
 	}
 
@@ -88,18 +128,31 @@ extension TankWorld {
 		return gameObject.energy <= 0
 	}
 
-	func randomizeGameObjects<T>(_ gameObjects: inout [T]) {
+	func randomizeGameObjects<T: GameObject>(_ gameObjects: inout [T]) {
 
 		var last = gameObjects.count - 1
 
 		while last > 0 {
 
-			srandom(UInt32(time(nil)))
 			let rand = Int(random() % (last + 1))
 			gameObjects.swapAt(last, rand)
 			last -= 1
 
 		}
 
+	}
+
+	func randomDirection () -> Direction {
+		let dirNum = Int(random() % 8)
+		var dir: Direction = .N
+		if dirNum == 0 {dir = .N}
+		else if dirNum == 1 {dir = .NE}
+		else if dirNum == 2 {dir = .E}
+		else if dirNum == 3 {dir = .SE}
+		else if dirNum == 4 {dir = .S}
+		else if dirNum == 5 {dir = .SW}
+		else if dirNum == 6 {dir = .W}
+		else {dir = .NW}
+		return dir
 	}
 }

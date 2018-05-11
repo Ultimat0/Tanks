@@ -68,6 +68,13 @@ extension TankWorld {
 		return findAllGameObjects().filter{$0.objectType == .Mine || $0.objectType == .Rover}.map {$0 as! Mine}
 	}
 
+	func containsTank(_ position: Position) -> Bool {
+		if let go = grid[position.row][position.col] {
+			return go.objectType == .Tank
+		}
+		return false
+	}
+
 
 
 

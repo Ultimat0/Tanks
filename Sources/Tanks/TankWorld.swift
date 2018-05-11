@@ -1,3 +1,5 @@
+import Foundation
+
 public class TankWorld {
 	
 	var grid: [[GameObject?]]
@@ -7,10 +9,13 @@ public class TankWorld {
 	let numberRows = 10
 	var numberLivingTanks = 0
 	var lastLivingTank: Tank? = nil
+	let constants: Constants = Constants()
 
 	init () {
 
 		grid = Array(repeating: Array(repeating: nil, count: numberCols), count: numberRows)
+		srandom(UInt32(time(nil)))
+
 	}
 
 	func setWinner(lastTankStanding: Tank) {
@@ -19,11 +24,16 @@ public class TankWorld {
 	}
 
 	func populateTankWorld () {
-		addGameObject(gameObject: Tank(row: 0, col: 0, name: "Tanky Boi", energy: 100000, id: "BOI", instructions: ""))
-		addGameObject(gameObject: Tank(row: 5, col: 5, name: "Tanku", energy: 100000, id: "TNK", instructions: ""))
+		addGameObject(gameObject: Tank(row: 5, col: 5, name: "Tanky Boi", energy: 100000, id: "BOI", instructions: ""))
+		/*addGameObject(gameObject: Tank(row: 5, col: 5, name: "Tanku", energy: 100000, id: "TNK", instructions: ""))
 		addGameObject(gameObject: Tank(row: 8, col: 8, name: "Cancer", energy: 100000, id: "AID", instructions: ""))
 		addGameObject(gameObject: Mine(row: 3, col: 5, name: "MrMine", energy: 4000, id: "MIN"))
-		addGameObject(gameObject: Rover(direction: .N, row: 4, col: 5, name: "RoverMan", energy: 5000, id: "ROV"))
+		addGameObject(gameObject: Rover(direction: nil, row: 4, col: 5, name: "RoverMan", energy: 5000, id: "ROV"))
+		addGameObject(gameObject: Rover(direction: nil, row: 6, col: 9, name: "RoverMan", energy: 5000, id: "ROV"))
+		addGameObject(gameObject: Rover(direction: nil, row: 0, col: 0, name: "RoverMan", energy: 5000, id: "ROV"))
+		addGameObject(gameObject: Rover(direction: nil, row: 9, col: 9, name: "RoverMan", energy: 5000, id: "ROV"))
+		addGameObject(gameObject: Rover(direction: nil, row: 5, col: 7, name: "RoverMan", energy: 5000, id: "ROV"))*/
+
 	}
 
 	func addGameObject (gameObject: GameObject) {
@@ -36,13 +46,22 @@ public class TankWorld {
 	func doTurn() {
 		var allObjects = findAllGameObjects()
 		print (allObjects)
-		//allObjects = randomizeGameObjects(&allObjects)
+		randomizeGameObjects(&allObjects)
+		print (allObjects)
 
 		for gameObject in allObjects {
 			switch gameObject.objectType {
-				case .Tank: handleTank(tank: (gameObject as! Tank))
-				case .Rover: print("QUEE")
-				case .Mine: print("Que")
+				case .Tank: handleTankPre(tank: (gameObject as! Tank))
+				case .Rover: handleRoverPre(rover: gameObject as! Rover)
+				case .Mine: print("Mine Pre")
+			}
+		}
+
+		for gameObject in allObjects {
+			switch gameObject.objectType {
+				case .Tank: handleTankPost(tank: (gameObject as! Tank))
+				case .Rover: handleRoverPost(rover: gameObject as! Rover)
+				case .Mine: print("Mine Post")
 			}
 		}
 		
