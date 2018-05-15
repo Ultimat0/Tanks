@@ -22,8 +22,7 @@ struct MessageCenter: CustomStringConvertible{
     var description: String{
         var desc = ""
         for e in messageContainer{
-            desc.append("ID: \(e.0) Message: \(e.1)")
-            desc.append("\n")
+            desc.append("ID: \(e.0) Message: \(e.1)\n")
         }
         return desc
     }
