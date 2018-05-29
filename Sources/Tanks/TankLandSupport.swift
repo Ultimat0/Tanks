@@ -13,6 +13,11 @@ extension TankWorld {
 		actionRunMove(tank: tank, moveAction: moveAction as! MoveAction)
 	}
 
+	func handleMissile(tank: Tank) {
+		guard let missileAction = tank.postActions[.Missile] else {return}
+		actionRunMissile(tank: tank, missileAction: missileAction as! MissileAction)
+	}
+
 	func handleTankPre(tank: Tank) {
 		tank.computePreActions()
 		tank.useEnergy(amount: constants.costLifeSupportTank)
@@ -23,6 +28,7 @@ extension TankWorld {
 	func handleTankPost(tank: Tank) {
 		tank.computePostActions()
 		handleMove(tank: tank)
+		handleMissile(tank: tank)
 		tank.clearActions()
 	}
 
@@ -51,14 +57,18 @@ extension TankWorld {
 				let newPos = newPosition(position: rover.position, direction: randomDirection(), distance: 1)
 				rover.setPosition(newPosition: newPos)
 				if !isPositionEmpty(newPos) {
-					grid[rover.position.row][rover.position.col]!.useEnergy(amount: rover.energy)
+					if (grid[rover.position.row][rover.position.col]!.objectType == .Tank) {
+						grid[rover.position.row][rover.position.col]!.useEnergy(amount: rover.energy)
+					}
+					else {
+						grid[rover.position.row][rover.position.col] = nil
+					}
 				}
 				else {
 					grid[newPos.row][newPos.col] = rover
 				}
 			}
-		}
-		
+		}	
 	}
 
 	func handleMinePre (mine: Mine) {
@@ -80,7 +90,40 @@ extension TankWorld {
 	}
 
 	func actionRunRadar(tank: Tank, radarAction: RadarAction) {
-		
+		if isEnergyAvailable(gameObject: tank, cost: constants.costOfRadarByUnitsDistance[radarAction.range - 1]) {
+			var results: [RadarResult] = [RadarResult]()
+			for gameObject in gameObjectsInRadius(position: tank.position, radius: radarAction.range) {
+				results.append(RadarResult(gameObject: gameObject))
+			}
+			tank.setRadarResult(radarResults: results)
+			tank.useEnergy(amount: constants.costOfRadarByUnitsDistance[radarAction.range - 1])
+		}
+	}
+
+	func actionRunMissile(tank: Tank, missileAction: MissileAction) {
+		if !isPositionEmpty(missileAction.target) {
+			let go = grid[missileAction.target.row][missileAction.target.col]!
+			if go.objectType == .Tank {
+				let tankEnergy = go.energy
+				go.useEnergy(amount: missileAction.power * constants.missileStrikeMultiple)
+				if (go.energy <= 0) {
+					tank.addEnergy(amount: Int(tankEnergy/constants.missileStrikeEnergyTransferFraction))
+					grid[missileAction.target.row][missileAction.target.col] = nil
+				}
+			}
+			else {grid[missileAction.target.row][missileAction.target.col] = nil}
+		}
+		for go in gameObjectsInRadius(position: missileAction.target, radius: 1) {
+			if go.objectType == .Tank {
+				let tankEnergy = go.energy
+				go.useEnergy(amount: missileAction.power * constants.missileStrikeMultiple / 4)
+				if (go.energy <= 0) {
+					tank.addEnergy(amount: Int(tankEnergy/constants.missileStrikeEnergyTransferFraction))
+					grid[missileAction.target.row][missileAction.target.col] = nil
+				}
+			}
+			else {grid[missileAction.target.row][missileAction.target.col] = nil}
+		}
 	}
 
 
@@ -150,6 +193,11 @@ extension TankWorld {
 
 	}
 
+	
+	func isEnergyAvailable(gameObject: GameObject, cost: Int) -> Bool {
+		return gameObject.energy > cost
+	}
+
 	func randomDirection () -> Direction {
 		let dirNum = Int(random() % 8)
 		var dir: Direction = .N
@@ -164,7 +212,5 @@ extension TankWorld {
 		return dir
 	}
 
-	func isEnergyAvailable(gameObject: GameObject, cost: Int) -> Bool {
-		return gameObject.energy > cost
-	}
+
 }

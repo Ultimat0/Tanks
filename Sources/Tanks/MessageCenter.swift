@@ -9,14 +9,14 @@
 import Foundation
 
 struct MessageCenter: CustomStringConvertible{
-    var messageContainer: [Int: String]
+    var messageContainer: [String: String]
     init(){
-        self.messageContainer = [Int: String]()
+        self.messageContainer = [String: String]()
     }
-    mutating func sendMessage(id: Int, message: String){
+    mutating func sendMessage(id: String, message: String){
         messageContainer[id] = message
     }
-    func receiveMessage(id: Int)->String{
+    func receiveMessage(id: String)->String{
         return messageContainer[id]!
     }
     var description: String{
@@ -27,3 +27,5 @@ struct MessageCenter: CustomStringConvertible{
         return desc
     }
 }
+
+

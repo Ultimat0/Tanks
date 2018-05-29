@@ -39,3 +39,15 @@ struct Position: CustomStringConvertible {
 enum Direction {
 	case N, NE, E, SE, S, SW, W, NW
 }
+
+struct RadarResult {
+	let position: Position
+	let id: String
+	let energy: Int
+
+	init(gameObject: GameObject) {
+		position = gameObject.position
+		id = gameObject.id
+		energy = gameObject.energy
+	}
+}

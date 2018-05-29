@@ -76,7 +76,18 @@ extension TankWorld {
 	}
 
 
-
+	func gameObjectsInRadius (position: Position, radius: Int) -> [GameObject] {
+		var gameObjects = [GameObject]()
+		for row in (position.row - radius)...(position.row + radius) {
+			for col in (position.col - radius)...(position.col + radius) {
+				if isGoodIndex(row: row, col: col) {
+					if (!isPositionEmpty(Position(row: row, col: col)) && !(col == position.col && row == position.row)) {gameObjects.append(grid[row][col]!)}
+				}
+			}
+		}
+		print (gameObjects)
+		return gameObjects
+	}
 
 
 }
