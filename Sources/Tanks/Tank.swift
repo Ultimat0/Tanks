@@ -2,16 +2,24 @@ import Foundation
 
 class Tank: GameObject {
 
+	enum Mode {
+		case GUNRUN, CHILL
+	}
+
 	private (set) var shields: Int = 0
 	private var radarResults: [RadarResult]?
 	private var receivedMessage: String?
 	private (set) var preActions = [Actions : PreAction]()
 	private (set) var postActions = [Actions: PostAction]()
 	private let initialInstructions: String?
+	private var turn = 0
+	private var mode: Mode = .GUNRUN
+	private var chillin = false
 
-	init (row: Int, col: Int, name: String, energy: Int, id: String, instructions: String) {
+
+	init (row: Int, col: Int, energy: Int, id: String, instructions: String) {
 		initialInstructions = instructions
-		super.init(row: row, col: col, objectType: .Tank, name: name, energy: energy, id: id)
+		super.init(row: row, col: col, objectType: .Tank, energy: energy, id: id)
 	}
 
 	final func clearActions() {
@@ -22,16 +30,38 @@ class Tank: GameObject {
 	final func receiveMessage (message: String?) {receivedMessage = message}
 
 	func computePreActions() {
-		addPreAction(preAction: RadarAction(range: 4))
+		turn += 1
+		if let r = radarResults {
+			if turn >= 100 || chillin || r.count == 0{
+				mode = .CHILL
+				chillin = true
+			}
+		}
+		else {
+			mode = .GUNRUN
+		}
+
+		switch mode{
+			case .CHILL: print ("CLAP is chillin")
+			case .GUNRUN: addPreAction(preAction: RadarAction(range: 4))
+			default: print ("slow CLAP")
+		}
 	}
 
 	func computePostActions() {
-		print (radarResults![0].id)
-	/*	let dist = Int(random() % 3) + 1
-		let dir = randomDirection()
-		print ("\(name): \(dir) \(dist)")
-		//addPostAction (postAction: MoveAction(distance: dist, direction: dir))
-		addPostAction (postAction: MissileAction(power: 1000, target: Position(row: 6, col: 9)))*/
+
+		switch mode {
+			case .CHILL: print ("CLAP is chillin")
+			case .GUNRUN: 
+				for i in radarResults! {
+					if !isFriendly(tank: i){
+						addPostAction(postAction: MissileAction(power: (i.energy) / 10, target: i.position))
+						break;
+					}
+				}
+				addPostAction(postAction: MoveAction(distance: 2, direction: randomDirection()))
+			default: print("slow CLAP")
+		}
 	}
 
 	final func addPreAction (preAction: PreAction) {
@@ -64,6 +94,10 @@ class Tank: GameObject {
 		else if dirNum == 6 {dir = .W}
 		else {dir = .NW}
 		return dir
+	}
+
+	func isFriendly(tank: RadarResult) -> Bool{
+		return tank.id == id
 	}
 
 }

@@ -23,7 +23,7 @@ extension TankWorld {
 						}
 					}
 					else if i == 1 {
-						gridPrint += "|  " + (grid[row][col] == nil ? "     " : grid[row][col]!.name.prefix(5)) + "  "
+						gridPrint += "|  " + (grid[row][col] == nil ? "    " : grid[row][col]!.id.prefix(4)) + "   "
 					}
 					else if i == 2 {
 						if let item = grid[row][col] {

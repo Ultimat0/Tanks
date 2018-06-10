@@ -24,8 +24,8 @@ public class TankWorld {
 	}
 
 	func populateTankWorld () {
-		addGameObject(gameObject: Tank(row: 5, col: 5, name: "Tanky Boi", energy: 100000, id: "BOI", instructions: ""))
-		addGameObject(gameObject: Tank(row: 5, col: 9, name: "Tanku", energy: 100000, id: "TNK", instructions: ""))
+		addGameObject(gameObject: Tank(row: 5, col: 5, energy: 100000, id: "CLAP", instructions: ""))
+		addGameObject(gameObject: Tank(row: 5, col: 9, energy: 100000, id: "OPOP", instructions: ""))
 		/*addGameObject(gameObject: Tank(row: 8, col: 8, name: "Cancer", energy: 100000, id: "AID", instructions: ""))
 		addGameObject(gameObject: Mine(row: 3, col: 5, name: "MrMine", energy: 4000, id: "MIN"))
 		addGameObject(gameObject: Rover(direction: nil, row: 4, col: 5, name: "RoverMan", energy: 5000, id: "ROV"))

@@ -18,11 +18,16 @@ extension TankWorld {
 		actionRunMissile(tank: tank, missileAction: missileAction as! MissileAction)
 	}
 
+	func handleShields(tank: Tank) {
+		guard let shieldAction = tank.preActions[.Shields] else {return}
+		actionRunShields(tank: tank, shieldAction: shieldAction as! ShieldAction)
+	}
+
 	func handleTankPre(tank: Tank) {
 		tank.computePreActions()
 		tank.useEnergy(amount: constants.costLifeSupportTank)
 		handleRadar(tank: tank)
-		//ADD PREACTION STUFF
+		handleShields(tank: tank)
 	}
 
 	func handleTankPost(tank: Tank) {
@@ -74,6 +79,15 @@ extension TankWorld {
 	func handleMinePre (mine: Mine) {
 		mine.useEnergy(amount: constants.costLifeSupportMine)
 	}
+
+
+	func actionRunShields (tank: Tank, shieldAction: ShieldAction) {
+		if isEnergyAvailable(gameObject: tank, cost: shieldAction.power) {
+			tank.setShields(amount: (constants.shieldPowerMultiple * shieldAction.power))
+			tank.useEnergy(amount: shieldAction.power)
+		}
+	}
+
 
 	func actionRunMove(tank: Tank, moveAction: MoveAction) {
 		
