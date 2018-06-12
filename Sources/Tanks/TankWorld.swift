@@ -26,11 +26,17 @@ public class TankWorld {
 
 	func populateTankWorld () {
 		addGameObject(gameObject: CLAPTank(row: 5, col: 5, energy: 100000, id: "CLAP", instructions: ""))
-		addGameObject(gameObject: CLAPTank(row: 14, col: 14, energy: 100000, id: "OPOP", instructions: ""))
-		addGameObject(gameObject: CLAPTank(row: 5, col: 11, energy: 100000, id: "BOIO", instructions: ""))
+		addGameObject(gameObject: CLAPTank(row: 4, col: 7, energy: 100000, id: "CLAP", instructions: ""))
+		addGameObject(gameObject: SampleTank(row: 14, col: 14, energy: 100000, id: "OPOP", instructions: ""))
+		addGameObject(gameObject: SampleTank(row: 5, col: 11, energy: 100000, id: "BOIO", instructions: ""))
 		addGameObject(gameObject: SampleTank(row: 1, col: 8, energy: 100000, id: "OKOK", instructions: ""))
 		addGameObject(gameObject: SampleTank(row: 8, col: 8, energy: 100000, id: "AIDS", instructions: ""))
 		addGameObject(gameObject: SampleTank(row: 12, col: 4, energy: 100000, id: "SNIK", instructions: ""))
+		addGameObject(gameObject: SampleTank(row: 10, col: 10, energy: 100000, id: "OPOP", instructions: ""))
+		addGameObject(gameObject: SampleTank(row: 9, col: 2, energy: 100000, id: "BOIO", instructions: ""))
+		addGameObject(gameObject: SampleTank(row: 3, col: 14, energy: 100000, id: "OKOK", instructions: ""))
+		addGameObject(gameObject: SampleTank(row: 1, col: 1, energy: 100000, id: "AIDS", instructions: ""))
+		addGameObject(gameObject: SampleTank(row: 3, col: 4, energy: 100000, id: "SNIK", instructions: ""))
 
 	}
 
@@ -75,9 +81,11 @@ public class TankWorld {
 		/*while !gameOver {
 			runOneTurn()
 		}*/
-		for _ in 0..<20 {
+		while true {
 			runOneTurn()
+			readLine()
 		}
+		
 	}
 
 

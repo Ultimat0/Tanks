@@ -24,13 +24,18 @@ extension TankWorld {
 	}
 
 	func handleTankPre(tank: Tank) {
-		tank.computePreActions()
-		let old = tank.energy
-		logger.addLog(tank, "LIFE SUPPORT")
-		tank.useEnergy(amount: constants.costLifeSupportTank)
-		energyDrop(tank, old, tank.energy)
-		handleRadar(tank: tank)
-		handleShields(tank: tank)
+		if tank.energy < 1 {
+			grid[tank.position.row][tank.position.col] = nil
+		}
+		else {
+			tank.computePreActions()
+			let old = tank.energy
+			logger.addLog(tank, "LIFE SUPPORT")
+			tank.useEnergy(amount: constants.costLifeSupportTank)
+			energyDrop(tank, old, tank.energy)
+			handleRadar(tank: tank)
+			handleShields(tank: tank)
+		}
 	}
 
 	func handleTankPost(tank: Tank) {

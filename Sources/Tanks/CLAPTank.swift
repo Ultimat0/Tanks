@@ -41,7 +41,7 @@ class CLAPTank: Tank {
 			case .GUNRUN: 
 				for i in radarResults! {
 					if !isFriendly(tank: i){
-						addPostAction(postAction: MissileAction(power: (i.energy) / 10 + 30, target: i.position))
+						addPostAction(postAction: MissileAction(power: ((i.energy) / 10) + 300, target: i.position))
 						break
 					}
 				}
