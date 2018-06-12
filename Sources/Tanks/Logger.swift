@@ -15,7 +15,7 @@ func getTime()->String{
     let hour = components.hour
     let minute = components.minute
     let second = components.second
-    return "\(hour):\(minute):\(second)"
+    return "\(hour!):\(minute!):\(second!)"
 }
 
 struct Logger{
@@ -25,14 +25,12 @@ struct Logger{
     mutating func log(_ message: String){
         print(message)
     }
-    mutating func addLog(gameObject: GameObject, message: String){
-        if majorLoggers.contains(where: {$0 === gameObject}) {
-            log("\(tankWorld.turn) \(getTime()) \(gameObject.id) \(gameObject.position) \(message)")
-        }
-        log("\(tankWorld.turn) \(getTime()) \(gameObject.id) is not allowed to log!")
+    mutating func addLog(_ gameObject: GameObject, _ message: String){
+        log("\(tankWorld.turn) \(getTime()) \(gameObject.id) \(gameObject.position) \(message)")
     }
-    mutating func addMajorLogger(gameObject: GameObject, message: String){
+    mutating func addMajorLog(gameObject: GameObject, message: String){
         majorLoggers.append(gameObject)
-        addLog(gameObject: gameObject, message: "\(gameObject.id): \(message)")
+        addLog(gameObject, "\(gameObject.id): \(message)")
     }
+
 }

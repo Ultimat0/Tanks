@@ -25,7 +25,10 @@ extension TankWorld {
 
 	func handleTankPre(tank: Tank) {
 		tank.computePreActions()
+		let old = tank.energy
+		logger.addLog(tank, "LIFE SUPPORT")
 		tank.useEnergy(amount: constants.costLifeSupportTank)
+		energyDrop(tank, old, tank.energy)
 		handleRadar(tank: tank)
 		handleShields(tank: tank)
 	}
@@ -39,7 +42,10 @@ extension TankWorld {
 
 
 	func handleRoverPre(rover: Rover) {
+		let old = rover.energy
+		logger.addLog(rover, "LIFE SUPPORT")
 		rover.useEnergy(amount: constants.costLifeSupportRover)
+		energyDrop(rover, old, rover.energy)
 	}
 
 	func handleRoverPost(rover: Rover) {
@@ -47,8 +53,16 @@ extension TankWorld {
 			if isEnergyAvailable(gameObject: rover, cost: constants.costOfMovingRover) {
 				grid[rover.position.row][rover.position.col] = nil
 				let newPos = newPosition(position: rover.position, direction: dir, distance: 1)
-				if newPos.row != rover.position.row || newPos.col != rover.position.col {rover.useEnergy(amount: constants.costOfMovingRover)}
+				let old = rover.energy
+				let oldPos = rover.position
+				if newPos.row != rover.position.row || newPos.col != rover.position.col {
+					rover.useEnergy(amount: constants.costOfMovingRover)
+					rover.setPosition(newPosition: newPos)
+					logger.addLog(rover, "Moved from \(oldPos) to \(rover.position)")
+					energyDrop(rover, old, rover.energy)
+				}
 				if !isPositionEmpty(newPos) {
+					logger.addLog(rover, "Collided with grid[rover.position.row][rover.position.col]!.id")				
 					grid[rover.position.row][rover.position.col]!.useEnergy(amount: rover.energy)
 				}
 				else {
@@ -60,7 +74,9 @@ extension TankWorld {
 			if isEnergyAvailable(gameObject: rover, cost: constants.costOfMovingRover) {
 				grid[rover.position.row][rover.position.col] = nil
 				let newPos = newPosition(position: rover.position, direction: randomDirection(), distance: 1)
+				let oldPos = rover.position
 				rover.setPosition(newPosition: newPos)
+				logger.addLog(rover, "Moved from \(oldPos) to \(rover.position)")
 				if !isPositionEmpty(newPos) {
 					if (grid[rover.position.row][rover.position.col]!.objectType == .Tank) {
 						grid[rover.position.row][rover.position.col]!.useEnergy(amount: rover.energy)
@@ -77,13 +93,16 @@ extension TankWorld {
 	}
 
 	func handleMinePre (mine: Mine) {
+		let old = mine.energy
 		mine.useEnergy(amount: constants.costLifeSupportMine)
+		energyDrop(mine, old, mine.energy)
 	}
 
 
 	func actionRunShields (tank: Tank, shieldAction: ShieldAction) {
 		if isEnergyAvailable(gameObject: tank, cost: shieldAction.power) {
 			tank.setShields(amount: (constants.shieldPowerMultiple * shieldAction.power))
+			logger.addLog(tank, "Setting shields to \(constants.shieldPowerMultiple * shieldAction.power)")
 			tank.useEnergy(amount: shieldAction.power)
 		}
 	}
@@ -96,10 +115,14 @@ extension TankWorld {
 		let cost = constants.costOfMovingTankPerUnitDistance[moveAction.distance - 1]
 
 		if isPositionEmpty(newPos) && !containsTank(newPos) && isEnergyAvailable(gameObject: tank, cost: cost){
+		 	let old = tank.energy
+		 	let oldPos = tank.position
 			grid[tank.position.row][tank.position.col] = nil
 			tank.setPosition(newPosition: newPos)
 			grid[tank.position.row][tank.position.col] = tank
+			logger.addLog(tank, "Moving from \(oldPos) to \(tank.position)")
 			tank.useEnergy(amount: cost)
+			energyDrop(tank, old, tank.energy)
 		}
 	}
 
@@ -110,33 +133,48 @@ extension TankWorld {
 				results.append(RadarResult(gameObject: gameObject))
 			}
 			tank.setRadarResult(radarResults: results)
+			let old = tank.energy
+			logger.addLog(tank, "Running radar \(radarAction.range)")
 			tank.useEnergy(amount: constants.costOfRadarByUnitsDistance[radarAction.range - 1])
+			energyDrop(tank, old, tank.energy)
 		}
 	}
 
 	func actionRunMissile(tank: Tank, missileAction: MissileAction) {
-		if !isPositionEmpty(missileAction.target) {
-			let go = grid[missileAction.target.row][missileAction.target.col]!
-			if go.objectType == .Tank {
-				let tankEnergy = go.energy
-				go.useEnergy(amount: missileAction.power * constants.missileStrikeMultiple)
-				if (go.energy <= 0) {
-					tank.addEnergy(amount: Int(tankEnergy/constants.missileStrikeEnergyTransferFraction))
-					grid[missileAction.target.row][missileAction.target.col] = nil
+
+		var cost = 1000
+		cost += Int(sqrt(pow(Double(tank.position.row - missileAction.target.row), 2.0) + pow(Double(tank.position.col - missileAction.target.col), 2.0))) * 200
+		if isEnergyAvailable(gameObject: tank, cost: cost) {
+			logger.log("**********MISSILE STRIKE RESULTS \(tank.id) hits \(missileAction.target)")
+			logger.addLog(tank, "strikes location \(missileAction.target) with \(missileAction.power) energy")
+			if !isPositionEmpty(missileAction.target) {
+				let go = grid[missileAction.target.row][missileAction.target.col]!
+				if go.objectType == .Tank {
+					let tanku = go as! Tank
+					let tankEnergy = go.energy
+					go.useEnergy(amount: (missileAction.power * constants.missileStrikeMultiple - tanku.shields))
+					if (go.energy < 1) {
+						tank.addEnergy(amount: Int(tankEnergy/constants.missileStrikeEnergyTransferFraction))
+						grid[go.position.row][go.position.col] = nil
+					}
+					energyDrop(go, tankEnergy, go.energy)
 				}
+				else {grid[missileAction.target.row][missileAction.target.col] = nil}
 			}
-			else {grid[missileAction.target.row][missileAction.target.col] = nil}
-		}
-		for go in gameObjectsInRadius(position: missileAction.target, radius: 1) {
-			if go.objectType == .Tank {
-				let tankEnergy = go.energy
-				go.useEnergy(amount: missileAction.power * constants.missileStrikeMultiple / 4)
-				if (go.energy <= 0) {
-					tank.addEnergy(amount: Int(tankEnergy/constants.missileStrikeEnergyTransferFraction))
-					grid[missileAction.target.row][missileAction.target.col] = nil
+			for go in gameObjectsInRadius(position: missileAction.target, radius: 1) {
+				if go.objectType == .Tank {
+					let tankEnergy = go.energy
+					let tanku = go as! Tank
+					go.useEnergy(amount: missileAction.power * constants.missileStrikeMultiple / 4 - tanku.shields)
+					if (go.energy < 0) {
+						tank.addEnergy(amount: Int(tankEnergy/constants.missileStrikeEnergyTransferFraction))
+						grid[missileAction.target.row][missileAction.target.col] = nil
+					}
+					energyDrop(go, tankEnergy, go.energy)
 				}
+				else {grid[missileAction.target.row][missileAction.target.col] = nil}
 			}
-			else {grid[missileAction.target.row][missileAction.target.col] = nil}
+			logger.log("**********END MISSILE STRIKE RESULTS")
 		}
 	}
 
@@ -226,5 +264,8 @@ extension TankWorld {
 		return dir
 	}
 
+	func energyDrop(_ object: GameObject, _ oldEnergy: Int, _ energy: Int) {
+        logger.addLog(object, "Energy drop from \(oldEnergy) to \(energy)")
+	}
 
 }

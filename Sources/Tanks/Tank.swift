@@ -7,7 +7,7 @@ class Tank: GameObject {
 	}
 
 	private (set) var shields: Int = 0
-	private var radarResults: [RadarResult]?
+	var radarResults: [RadarResult]?
 	private var receivedMessage: String?
 	private (set) var preActions = [Actions : PreAction]()
 	private (set) var postActions = [Actions: PostAction]()
@@ -42,25 +42,25 @@ class Tank: GameObject {
 		}
 
 		switch mode{
-			case .CHILL: print ("CLAP is chillin")
+			case .CHILL: break
 			case .GUNRUN: addPreAction(preAction: RadarAction(range: 4))
-			default: print ("slow CLAP")
+			default: break
 		}
 	}
 
 	func computePostActions() {
 
 		switch mode {
-			case .CHILL: print ("CLAP is chillin")
+			case .CHILL: break
 			case .GUNRUN: 
 				for i in radarResults! {
 					if !isFriendly(tank: i){
-						addPostAction(postAction: MissileAction(power: (i.energy) / 10, target: i.position))
-						break;
+						addPostAction(postAction: MissileAction(power: (i.energy) / 10 + 30, target: i.position))
+						break
 					}
 				}
 				addPostAction(postAction: MoveAction(distance: 2, direction: randomDirection()))
-			default: print("slow CLAP")
+			default: break;
 		}
 	}
 

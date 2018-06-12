@@ -85,7 +85,6 @@ extension TankWorld {
 				}
 			}
 		}
-		print (gameObjects)
 		return gameObjects
 	}
 

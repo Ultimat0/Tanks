@@ -5,11 +5,12 @@ public class TankWorld {
 	var grid: [[GameObject?]]
 	var turn: Int = 0
 	var gameOver = false
-	let numberCols = 10
-	let numberRows = 10
+	let numberCols = 15
+	let numberRows = 15
 	var numberLivingTanks = 0
 	var lastLivingTank: Tank? = nil
 	let constants: Constants = Constants()
+	var logger = Logger()
 
 	init () {
 
@@ -25,19 +26,16 @@ public class TankWorld {
 
 	func populateTankWorld () {
 		addGameObject(gameObject: Tank(row: 5, col: 5, energy: 100000, id: "CLAP", instructions: ""))
-		addGameObject(gameObject: Tank(row: 5, col: 9, energy: 100000, id: "OPOP", instructions: ""))
-		/*addGameObject(gameObject: Tank(row: 8, col: 8, name: "Cancer", energy: 100000, id: "AID", instructions: ""))
-		addGameObject(gameObject: Mine(row: 3, col: 5, name: "MrMine", energy: 4000, id: "MIN"))
-		addGameObject(gameObject: Rover(direction: nil, row: 4, col: 5, name: "RoverMan", energy: 5000, id: "ROV"))
-		addGameObject(gameObject: Rover(direction: nil, row: 6, col: 9, name: "RoverMan", energy: 5000, id: "ROV"))
-		addGameObject(gameObject: Rover(direction: nil, row: 0, col: 0, name: "RoverMan", energy: 5000, id: "ROV"))
-		addGameObject(gameObject: Rover(direction: nil, row: 9, col: 9, name: "RoverMan", energy: 5000, id: "ROV"))
-		addGameObject(gameObject: Rover(direction: nil, row: 5, col: 7, name: "RoverMan", energy: 5000, id: "ROV"))*/
+		addGameObject(gameObject: Tank(row: 14, col: 14, energy: 100000, id: "OPOP", instructions: ""))
+		addGameObject(gameObject: Tank(row: 5, col: 11, energy: 100000, id: "BOIO", instructions: ""))
+		addGameObject(gameObject: SampleTank(row: 1, col: 8, energy: 100000, id: "OKOK", instructions: ""))
+		addGameObject(gameObject: SampleTank(row: 8, col: 8, energy: 100000, id: "AIDS", instructions: ""))
+		addGameObject(gameObject: SampleTank(row: 12, col: 4, energy: 100000, id: "SNIK", instructions: ""))
 
 	}
 
 	func addGameObject (gameObject: GameObject) {
-		//logger.addMajorLog(gameObject, "Added to TankLand")
+		logger.addLog(gameObject, "Added to TankLand")
 		grid[gameObject.position.row] [gameObject.position.col] = gameObject
 		if gameObject.objectType == .Tank {numberLivingTanks += 1}
 	}
@@ -45,15 +43,13 @@ public class TankWorld {
 	
 	func doTurn() {
 		var allObjects = findAllGameObjects()
-		print (allObjects)
 		randomizeGameObjects(&allObjects)
-		print (allObjects)
 
 		for gameObject in allObjects {
 			switch gameObject.objectType {
 				case .Tank: handleTankPre(tank: (gameObject as! Tank))
 				case .Rover: handleRoverPre(rover: gameObject as! Rover)
-				case .Mine: print("Mine Pre")
+				case .Mine: break
 			}
 		}
 
@@ -61,7 +57,7 @@ public class TankWorld {
 			switch gameObject.objectType {
 				case .Tank: handleTankPost(tank: (gameObject as! Tank))
 				case .Rover: handleRoverPost(rover: gameObject as! Rover)
-				case .Mine: print("Mine Post")
+				case .Mine: break
 			}
 		}
 		
@@ -79,8 +75,10 @@ public class TankWorld {
 		/*while !gameOver {
 			runOneTurn()
 		}*/
-		for _ in 0..<1 {
+		for _ in 0..<20 {
 			runOneTurn()
 		}
 	}
+
+
 }
